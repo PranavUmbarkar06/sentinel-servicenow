@@ -1,0 +1,13 @@
+{
+  "name": "kenzen",
+  "version": "1.0.0",
+  "description": "Campus mental health early warning and zero-friction triage system (Co-Innovation Day prototype)",
+  "main": "server.js",
+  "private": true,
+  "scripts": {
+    "start": "node server.js",
+    "data": "node scripts/generate-data.js"
+  },
+  "engines": { "node": ">=18" },
+  "dependencies": {}
+}

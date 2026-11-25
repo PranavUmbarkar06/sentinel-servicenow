@@ -1,0 +1,32 @@
+{
+  "student_id": "STU-1208",
+  "name": "Rahul",
+  "program": "B.Tech CSE",
+  "year": 2,
+  "window": "2026-08-01/2026-09-30",
+  "telemetry": {
+    "attendance_drop_pct": 80,
+    "sports_rfid_inactivity_pct": 100,
+    "library_drop_pct": 40,
+    "gpa_prev": 8.5,
+    "gpa_curr": 6.98,
+    "last_court_checkin_days": 41
+  },
+  "tier1": {
+    "model": "sri-linreg-v1.3",
+    "sri": 78,
+    "contributions": {
+      "attendance_drop_pct": 28,
+      "sports_inactivity_pct": 25,
+      "library_drop_pct": 6,
+      "gpa_drift_score": 19
+    },
+    "threshold": 65,
+    "route": "tier2_llm_triage"
+  },
+  "context": {
+    "entrance": "JEE Mains rank 1208 · JEE Advanced rank 7000",
+    "history": "Former hostel basketball regular. Stopped playing in Sem 3 to study more, under family pressure.",
+    "last_court_checkin_days": 41
+  }
+}

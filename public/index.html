@@ -1,0 +1,899 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kenzen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Shippori+Mincho:wght@400;500;600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<style>
+/* Layout: an editorial page on rice paper. A slim masthead (ensō mark, serif wordmark, text tabs) sits over generous margins.
+   Each view opens with a serif heading beside a sakura branch, then a two-column spread (main sheet + side notes) that stacks below 980px. */
+:root {
+  --bg: #F3EEE4; --surface: #FAF7F0; --surface-2: #EEE7DB; --ink: #211F1C; --ink-2: #4B463F; --muted: #7C7369; --line: #D8CFC1; --hair: #E5DDD0;
+  --sakura: #C4878F; --sakura-deep: #9E5A64; --sakura-soft: #F1E1DF;
+  --sage: #211F1C; --sage-strong: #211F1C; --sage-soft: #E9E2D6; --slate: #5E5850; --slate-soft: #ECE5D9;
+  --low: #55694E; --low-bg: #E5E8DC; --mod: #8C6A2F; --mod-bg: #F1E6D0; --high: #A1463E; --high-bg: #F3DEDA;
+  --chat-bg: #ECE5D8; --bubble-in: #FAF7F0; --bubble-out: #F1E1DF; --focus: #9E5A64;
+  --grain-opacity: .06;
+  --f-display: 'Shippori Mincho', 'Hiragino Mincho ProN', 'Yu Mincho', Georgia, serif;
+  --f-body: 'Zen Kaku Gothic New', 'Hiragino Sans', 'Segoe UI', system-ui, sans-serif;
+  --f-mono: 'JetBrains Mono', ui-monospace, Consolas, monospace;
+  --r: 3px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #171513; --surface: #1E1C19; --surface-2: #26231F; --ink: #ECE5D9; --ink-2: #C3BAAD; --muted: #948A7E; --line: #3A352F; --hair: #2D2925;
+  --sakura: #D9A2A9; --sakura-deep: #E4B4BA; --sakura-soft: #3A2729;
+  --sage: #ECE5D9; --sage-strong: #ECE5D9; --sage-soft: #2B2824; --slate: #B2A99C; --slate-soft: #2A2723;
+  --low: #A3B897; --low-bg: #242A21; --mod: #D8B474; --mod-bg: #332A1A; --high: #E59A90; --high-bg: #3A2421;
+  --chat-bg: #1A1816; --bubble-in: #24211E; --bubble-out: #3A2729; --focus: #E4B4BA; --grain-opacity: .08; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #171513; --surface: #1E1C19; --surface-2: #26231F; --ink: #ECE5D9; --ink-2: #C3BAAD; --muted: #948A7E; --line: #3A352F; --hair: #2D2925;
+  --sakura: #D9A2A9; --sakura-deep: #E4B4BA; --sakura-soft: #3A2729;
+  --sage: #ECE5D9; --sage-strong: #ECE5D9; --sage-soft: #2B2824; --slate: #B2A99C; --slate-soft: #2A2723;
+  --low: #A3B897; --low-bg: #242A21; --mod: #D8B474; --mod-bg: #332A1A; --high: #E59A90; --high-bg: #3A2421;
+  --chat-bg: #1A1816; --bubble-in: #24211E; --bubble-out: #3A2729; --focus: #E4B4BA; --grain-opacity: .08; color-scheme: dark; }
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--ink); font: 400 16px/1.75 var(--f-body); -webkit-font-smoothing: antialiased; position: relative; }
+body::before { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: var(--grain-opacity);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .4 0 0 0 0 .33 0 0 0 0 .25 0 0 0 1.2 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E"); }
+#root { position: relative; z-index: 1; }
+h1, h2, h3 { font-family: var(--f-display); font-weight: 500; line-height: 1.35; margin: 0; text-wrap: balance; letter-spacing: .01em; }
+h2 { font-size: 1.3rem; } h3 { font-size: 1.05rem; font-weight: 600; }
+p { margin: 0; }
+a { color: var(--sakura-deep); }
+button, input { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
+.mono { font-family: var(--f-mono); font-size: .8rem; }
+.num { font-variant-numeric: tabular-nums; }
+.eyebrow { font-size: .72rem; letter-spacing: .22em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+.muted { color: var(--muted); }
+.ico { width: 1em; height: 1em; flex: none; display: inline-block; vertical-align: -0.14em; stroke-width: 1.5; }
+
+/* masthead */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--bg); border-bottom: 1px solid var(--line); }
+.top-in { max-width: 1240px; margin: 0 auto; padding: 14px 28px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 28px; }
+.brand { display: flex; align-items: center; gap: 12px; margin-right: auto; }
+.mark { width: 38px; height: 38px; color: var(--ink); flex: none; }
+.brand h1 { font-size: 1.45rem; font-weight: 600; letter-spacing: .08em; }
+.brand small { display: block; color: var(--muted); font-size: .74rem; letter-spacing: .06em; margin-top: -2px; }
+.tabs { display: flex; gap: 26px; overflow-x: auto; max-width: 100%; }
+.tab { border: 0; background: transparent; padding: 8px 0 6px; cursor: pointer; color: var(--muted); font-size: .95rem; letter-spacing: .06em; white-space: nowrap; min-height: 42px; position: relative; transition: color .6s ease; }
+.tab:hover { color: var(--ink); }
+.tab::after { content: ''; position: absolute; left: 0; right: 0; bottom: 2px; height: 2px; background: var(--sakura); transform: scaleX(0); transform-origin: left; transition: transform .8s cubic-bezier(.2,.7,.2,1); border-radius: 2px; }
+.tab[aria-selected="true"] { color: var(--ink); }
+.tab[aria-selected="true"]::after { transform: scaleX(1); }
+
+.trust { display: flex; flex-wrap: wrap; gap: 6px 22px; align-items: center; font-size: .82rem; color: var(--ink-2); }
+.trust > span { display: inline-flex; align-items: center; gap: 8px; }
+.pill { display: inline-flex; align-items: center; gap: 6px; padding: 1px 8px; border-radius: var(--r); font-size: .76rem; font-weight: 500; line-height: 1.7; white-space: nowrap; border: 1px solid transparent; }
+.pill.trust-pill { background: none; padding: 0; color: var(--ink-2); white-space: normal; font-size: .82rem; letter-spacing: .02em; }
+.pill.mode { background: none; padding: 0; color: var(--muted); white-space: normal; max-width: 100%; font-size: .8rem; }
+.u-Low { color: var(--low); border-color: color-mix(in srgb, var(--low) 40%, transparent); }
+.u-Moderate { color: var(--mod); border-color: color-mix(in srgb, var(--mod) 45%, transparent); }
+.u-High { color: var(--high); border-color: color-mix(in srgb, var(--high) 45%, transparent); background: var(--high-bg); }
+.u-Immediate { background: var(--high); color: var(--surface); }
+.dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.petal-ico { width: 12px; height: 12px; color: var(--sakura); flex: none; }
+
+main { max-width: 1240px; margin: 0 auto; padding-block: 34px 56px; padding-inline: 28px; }
+.fade { animation: settle 1.1s ease both; }
+.view-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; margin: 30px 0 40px; position: relative; padding-right: 220px; min-height: 150px; }
+.view-head h2 { font-size: clamp(1.7rem, 3.2vw, 2.4rem); font-weight: 500; margin-top: 10px; letter-spacing: .02em; }
+.view-head p { color: var(--ink-2); max-width: 58ch; margin-top: 12px; }
+.view-head .eyebrow { display: flex; align-items: center; gap: 12px; }
+.view-head .eyebrow::after { content: ''; width: 48px; height: 1px; background: var(--sakura); }
+.branch { position: absolute; right: -10px; top: -26px; width: 250px; height: auto; pointer-events: none; color: var(--ink); opacity: .9; }
+.view-head > .btn { position: relative; z-index: 1; }
+.grid2 { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 36px; align-items: start; }
+@media (max-width: 980px) { .grid2 { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 1180px) { .grid2.dash { grid-template-columns: minmax(0, 1fr); } }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 26px; min-width: 0; }
+.stack { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+.row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 44px; padding: 9px 20px; border-radius: var(--r); border: 1px solid var(--ink); font-weight: 500; letter-spacing: .05em; cursor: pointer; transition: background .5s ease, color .5s ease, border-color .5s ease; }
+.btn-primary { background: var(--ink); color: var(--bg); }
+.btn-primary:hover { background: var(--sakura-deep); border-color: var(--sakura-deep); }
+.btn-ghost { background: transparent; border-color: var(--line); color: var(--ink); }
+.btn-ghost:hover { border-color: var(--ink); }
+.btn[disabled] { opacity: .45; cursor: not-allowed; }
+.btn-block { width: 100%; }
+.linkbtn { background: none; border: 0; color: var(--ink-2); cursor: pointer; padding: 6px 0; text-decoration: underline; text-decoration-color: var(--sakura); text-underline-offset: 4px; font-size: .9rem; }
+
+/* ---------- student view: chat */
+.phone { background: var(--chat-bg); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; display: flex; flex-direction: column; min-height: 600px; max-width: 540px; width: 100%; }
+.chat-top { display: flex; align-items: center; gap: 12px; padding: 14px 18px; background: var(--surface); border-bottom: 1px solid var(--line); }
+.avatar { width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--line); color: var(--ink); display: grid; place-items: center; flex: none; background: var(--surface); }
+.avatar svg { width: 26px; height: 26px; }
+.chat-top b { display: block; font-family: var(--f-display); font-weight: 600; letter-spacing: .04em; }
+.chat-top span { font-size: .78rem; color: var(--muted); }
+.chat-body { flex: 1; padding: 22px 18px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; max-height: 560px; }
+.daychip { align-self: center; font-size: .72rem; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); padding: 2px 10px; }
+.notice { align-self: center; text-align: center; font-size: .8rem; color: var(--mod); border: 1px solid var(--mod-bg); background: var(--surface); padding: 6px 12px; border-radius: var(--r); max-width: 90%; }
+.msg { max-width: 82%; padding: 10px 14px 6px; border-radius: 4px; animation: settle .9s ease both; border: 1px solid var(--hair); }
+.msg.in { background: var(--bubble-in); align-self: flex-start; }
+.msg.out { background: var(--bubble-out); align-self: flex-end; border-color: transparent; }
+.msg .who { font-size: .7rem; letter-spacing: .08em; color: var(--muted); margin-bottom: 3px; display: flex; gap: 6px; align-items: center; }
+.msg .who .ico { color: var(--sakura); }
+.msg .t { font-size: .68rem; color: var(--muted); text-align: right; margin-top: 2px; }
+.msg-actions { align-self: flex-start; max-width: 82%; display: flex; flex-direction: column; gap: 6px; }
+.typing { align-self: flex-start; background: var(--bubble-in); border: 1px solid var(--hair); padding: 12px 16px; border-radius: 4px; display: flex; gap: 5px; }
+.typing i { width: 5px; height: 5px; border-radius: 50%; background: var(--muted); animation: breathe 1.8s infinite ease-in-out; }
+.typing i:nth-child(2) { animation-delay: .3s; } .typing i:nth-child(3) { animation-delay: .6s; }
+.chat-input { display: flex; gap: 10px; padding: 12px; background: var(--surface); border-top: 1px solid var(--line); }
+.chat-input input { flex: 1; min-width: 0; border: 0; border-bottom: 1px solid var(--line); background: transparent; padding: 10px 4px; min-height: 44px; outline: none; transition: border-color .6s; }
+.chat-input input:focus { border-bottom-color: var(--sakura); }
+.send { width: 44px; height: 44px; border-radius: var(--r); border: 1px solid var(--ink); background: var(--ink); color: var(--bg); display: grid; place-items: center; cursor: pointer; flex: none; }
+.confirmed { display: flex; gap: 12px; align-items: flex-start; border-left: 2px solid var(--sakura); padding: 6px 0 6px 18px; color: var(--ink); font-family: var(--f-display); font-size: 1.05rem; line-height: 1.6; animation: settle 1.2s ease both; }
+.confirmed .ico { color: var(--sakura-deep); margin-top: 5px; }
+@keyframes settle { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+@keyframes breathe { 0%, 100% { opacity: .25; } 50% { opacity: 1; } }
+
+.steps { display: flex; flex-direction: column; }
+.step { display: grid; grid-template-columns: 34px minmax(0,1fr); gap: 14px; padding-bottom: 22px; position: relative; }
+.step:not(:last-child)::before { content: ''; position: absolute; left: 16px; top: 36px; bottom: 4px; width: 1px; background: var(--line); }
+.step .n { width: 33px; height: 33px; display: grid; place-items: center; color: var(--muted); font-family: var(--f-display); font-size: 1rem; border: 1px solid var(--line); border-radius: 50%; background: var(--surface); }
+.step.on .n { color: var(--ink); border-color: var(--sakura); }
+.step h3 { margin-top: 4px; }
+.step p { color: var(--ink-2); font-size: .92rem; margin-top: 4px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.chip { font-size: .76rem; padding: 1px 8px; border-radius: var(--r); color: var(--ink-2); border: 1px solid var(--line); }
+.chip.warn { color: var(--high); border-color: var(--high); }
+.helpline { display: flex; gap: 14px; align-items: flex-start; }
+.helpline strong { font-family: var(--f-display); font-weight: 600; font-size: 1.45rem; display: block; letter-spacing: .03em; }
+.helpline .avatar { color: var(--sakura-deep); }
+
+/* ---------- counselor */
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin-bottom: 40px; border-top: 1px solid var(--ink); border-bottom: 1px solid var(--line); }
+@media (max-width: 860px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.kpi.card { background: none; border: 0; border-radius: 0; padding: 18px 22px 20px; }
+.kpi + .kpi { border-left: 1px solid var(--line); }
+@media (max-width: 860px) { .kpi:nth-child(3) { border-left: 0; } .kpi:nth-child(n+3) { border-top: 1px solid var(--line); } }
+.kpi .v { font-family: var(--f-display); font-size: 2.5rem; font-weight: 500; line-height: 1.15; margin-top: 8px; display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.kpi .v small { font-family: var(--f-body); font-size: .82rem; color: var(--muted); }
+.kpi .sub { font-size: .8rem; color: var(--muted); margin-top: 2px; }
+.kpi .sub b { color: var(--sakura-deep); font-weight: 500; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.seg { display: flex; flex-wrap: wrap; gap: 4px 22px; }
+.seg button { border: 0; background: none; padding: 6px 0; font-size: .9rem; cursor: pointer; min-height: 40px; color: var(--muted); border-bottom: 1px solid transparent; transition: color .5s, border-color .5s; }
+.seg button:hover { color: var(--ink); }
+.seg button[aria-pressed="true"] { color: var(--ink); border-bottom-color: var(--sakura); }
+.search { display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--line); padding: 0 2px; min-height: 40px; color: var(--muted); flex: 1 1 200px; max-width: 260px; transition: border-color .6s; }
+.search:focus-within { border-bottom-color: var(--sakura); }
+.search input { border: 0; outline: 0; background: transparent; min-width: 0; width: 100%; color: var(--ink); }
+.tablewrap { overflow-x: auto; margin: 0 -26px; padding: 0 26px; }
+table { width: 100%; border-collapse: collapse; font-size: .9rem; min-width: 680px; }
+th { text-align: left; font-size: .7rem; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); font-weight: 500; padding: 10px 10px; border-bottom: 1px solid var(--ink); white-space: nowrap; }
+td { padding: 14px 10px; border-bottom: 1px solid var(--hair); vertical-align: middle; }
+tbody tr { cursor: pointer; transition: background .5s ease; }
+tbody tr:hover { background: var(--surface-2); }
+tbody tr.sel { background: var(--sakura-soft); }
+tbody tr.star td:first-child { box-shadow: inset 2px 0 0 var(--sakura); }
+.sname b { display: block; white-space: nowrap; font-weight: 500; }
+.sname span { font-size: .76rem; color: var(--muted); white-space: nowrap; }
+.srib { display: flex; align-items: center; gap: 10px; min-width: 84px; }
+.srib b { font-family: var(--f-display); font-size: 1.05rem; font-weight: 600; }
+.srib .bar { flex: 1; height: 2px; background: var(--hair); position: relative; }
+.srib .bar i { position: absolute; inset: 0 auto 0 0; }
+.rf { display: flex; flex-wrap: wrap; gap: 2px 14px; max-width: 220px; }
+td .rf { flex-direction: column; }
+.rf span { font-size: .76rem; color: var(--ink-2); white-space: nowrap; }
+
+.status { font-size: .82rem; color: var(--ink-2); min-width: 128px; max-width: 160px; line-height: 1.5; }
+td:last-child { white-space: nowrap; }
+.pager { display: flex; justify-content: space-between; align-items: center; margin-top: 18px; font-size: .84rem; color: var(--muted); flex-wrap: wrap; gap: 8px; }
+.pager .row button { min-height: 38px; padding: 5px 14px; }
+
+.panel { align-self: start; border-top: 2px solid var(--ink); }
+.p-head { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+.p-head h2 { font-size: 1.6rem; }
+.bigsri { font-family: var(--f-display); font-size: 3rem; line-height: 1; font-weight: 500; }
+.bigsri small { font-size: .95rem; color: var(--muted); font-family: var(--f-body); }
+.bullets { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 14px; }
+.bullets li { display: grid; grid-template-columns: 20px minmax(0,1fr); gap: 10px; font-size: .92rem; color: var(--ink-2); line-height: 1.7; }
+.bullets .bn { font-family: var(--f-display); color: var(--sakura-deep); font-size: 1rem; line-height: 1.6; }
+.override { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 16px 0; }
+.switch { display: flex; align-items: center; justify-content: space-between; gap: 14px; cursor: pointer; background: none; border: 0; padding: 0; width: 100%; text-align: left; }
+.track { width: 46px; height: 24px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface-2); position: relative; flex: none; transition: background .6s, border-color .6s; }
+.track::after { content: ''; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: var(--muted); transition: transform .6s cubic-bezier(.2,.7,.2,1), background .6s; }
+.switch[aria-checked="true"] .track { background: var(--sakura-soft); border-color: var(--sakura); }
+.switch[aria-checked="true"] .track::after { transform: translateX(22px); background: var(--sakura-deep); }
+.lock { display: flex; align-items: center; gap: 10px; margin-top: 14px; font-size: .9rem; font-family: var(--f-display); font-weight: 600; letter-spacing: .02em; }
+.lock.on { color: var(--ink); }
+.lock.on .ico { color: var(--sakura-deep); }
+.lock.off { color: var(--mod); }
+.depts { display: grid; grid-template-columns: 1fr; margin-top: 8px; font-size: .82rem; animation: settle .8s ease both; }
+.depts div { display: flex; justify-content: space-between; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--hair); }
+.depts span:last-child { color: var(--muted); text-align: right; }
+.sent { display: flex; flex-direction: column; gap: 10px; animation: settle 1s ease both; }
+.sent div { display: flex; gap: 10px; align-items: flex-start; font-size: .88rem; }
+.sent b { font-weight: 500; }
+.sent .ok { color: var(--sakura-deep); }
+.voucher { font-family: var(--f-mono); font-size: .78rem; color: var(--ink-2); border-top: 1px dashed var(--line); border-bottom: 1px dashed var(--line); padding: 8px 0; word-break: break-all; letter-spacing: .04em; }
+.skeleton { height: 12px; background: var(--surface-2); margin: 8px 0; animation: breathe 2.4s infinite ease-in-out; }
+
+/* ---------- engine */
+.gauge { position: relative; height: 4px; background: var(--hair); margin: 46px 0 34px; }
+.gauge .fill { position: absolute; inset: 0 auto 0 0; transition: width .6s ease, background .6s; }
+.gauge .thr { position: absolute; top: -14px; bottom: -14px; width: 1px; background: var(--sakura-deep); }
+.gauge .thr span { position: absolute; top: -22px; left: 50%; transform: translateX(-50%); font-size: .72rem; letter-spacing: .1em; white-space: nowrap; color: var(--sakura-deep); }
+.gauge .tick { position: absolute; top: 14px; font-size: .7rem; color: var(--muted); transform: translateX(-50%); }
+.slider { display: flex; flex-direction: column; gap: 4px; }
+.slider label { display: flex; justify-content: space-between; gap: 10px; font-size: .92rem; }
+.slider label > span:last-child { font-family: var(--f-display); font-weight: 600; }
+.slider input[type=range] { width: 100%; accent-color: var(--sakura-deep); height: 28px; }
+.contrib { display: grid; grid-template-columns: minmax(120px, 200px) minmax(0,1fr) 46px; gap: 12px; align-items: center; font-size: .86rem; }
+.contrib .b { height: 2px; background: var(--hair); }
+.contrib .b i { display: block; height: 100%; background: var(--ink); transition: width .6s ease; }
+.contrib b { font-family: var(--f-display); font-weight: 600; }
+.pipe { display: flex; align-items: stretch; gap: 10px; flex-wrap: wrap; }
+.node { flex: 1 1 130px; border-top: 1px solid var(--line); padding: 10px 2px; color: var(--muted); font-size: .82rem; transition: border-color .8s, color .8s; }
+.node b { display: block; color: var(--ink-2); font-size: .95rem; font-family: var(--f-display); font-weight: 600; }
+.node.on { border-top: 2px solid var(--ink); color: var(--ink-2); }
+.node.on b { color: var(--ink); }
+.node.hot { border-top: 2px solid var(--sakura); color: var(--sakura-deep); }
+.node.hot b { color: var(--ink); }
+.arrow { align-self: center; color: var(--line); }
+.pipe-card { background: none; border: 0; padding: 0 0 6px; }
+.banner { display: flex; gap: 10px; align-items: center; padding: 4px 0; font-family: var(--f-display); font-weight: 600; transition: color .8s; }
+.banner.t1 { color: var(--low); }
+.banner.t2 { color: var(--sakura-deep); }
+.json { background: var(--surface-2); border-radius: var(--r); padding: 16px; overflow: auto; max-height: 460px; margin: 0; font-family: var(--f-mono); font-size: .78rem; line-height: 1.7; white-space: pre; color: var(--ink-2); }
+.json .k { color: var(--ink); } .json .s { color: var(--low); } .json .n { color: var(--sakura-deep); } .json .bo { color: var(--mod); }
+.json .flash { background: var(--sakura-soft); }
+.log { display: flex; flex-direction: column; gap: 6px; font-family: var(--f-mono); font-size: .76rem; max-height: 160px; overflow-y: auto; }
+.log div { color: var(--ink-2); animation: settle .9s ease both; }
+.keys { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 8px 12px; font-size: .84rem; align-items: center; }
+.keys code { font-family: var(--f-mono); font-size: .76rem; word-break: break-all; }
+
+/* sakura petals drifting across the empty margins */
+.petals { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.petals svg { position: absolute; top: -4vh; width: 14px; height: 14px; color: var(--sakura); opacity: .55; animation: drift linear infinite; }
+@keyframes drift {
+  0% { transform: translate(0, -5vh) rotate(0deg); }
+  25% { transform: translate(-3vw, 25vh) rotate(70deg); }
+  50% { transform: translate(2vw, 55vh) rotate(150deg); }
+  75% { transform: translate(-2vw, 80vh) rotate(220deg); }
+  100% { transform: translate(1vw, 108vh) rotate(300deg); }
+}
+
+footer { max-width: 1240px; margin: 0 auto; padding-block: 28px 40px; padding-inline: 28px; color: var(--muted); font-size: .82rem; display: flex; flex-wrap: wrap; gap: 8px 32px; justify-content: space-between; align-items: baseline; border-top: 1px solid var(--line); position: relative; z-index: 1; }
+footer .quiet { font-family: var(--f-display); color: var(--ink-2); font-size: .95rem; }
+@media (max-width: 720px) { .view-head { padding-right: 0; padding-top: 70px; min-height: 0; } .branch { width: 170px; top: -30px; right: -16px; } }
+@media (max-width: 560px) { main, footer { padding-inline: 16px; } .top-in { padding: 10px 16px; } .card { padding: 18px; } .tablewrap { margin: 0 -18px; padding: 0 18px; } .phone { min-height: 520px; } .brand small { display: none; } .tabs { gap: 20px; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } .petals { display: none; } }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/htm@3.1.1/dist/htm.umd.js"></script>
+<script src="engine.js"></script>
+<script>
+(function () {
+'use strict';
+const { useState, useEffect, useMemo, useRef, useCallback } = React;
+const html = htm.bind(React.createElement);
+const E = window.KenzenEngine;
+
+// ------------------------------------------------------------ icons (Lucide-style paths)
+const ICONS = {
+  shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>',
+  heart: '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>',
+  chat: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+  users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+  activity: '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+  check: '<path d="M20 6 9 17l-5-5"/>',
+  lock: '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+  unlock: '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/>',
+  send: '<path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>',
+  calendar: '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+  clock: '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+  search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+  zap: '<path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/>',
+  cpu: '<rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3"/>',
+  phone: '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/>',
+  arrow: '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
+  info: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>',
+  download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/>',
+  sparkle: '<path d="M12 3l1.9 5.8L20 10l-6.1 1.2L12 17l-1.9-5.8L4 10l6.1-1.2z"/>',
+  reset: '<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>',
+};
+const Icon = ({ n, size }) => html`<svg className="ico" style=${size ? { width: size, height: size } : null} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" dangerouslySetInnerHTML=${{ __html: ICONS[n] }}></svg>`;
+
+// ------------------------------------------------------------ Kenzen marks: ensō, petal, sakura branch
+const Enso = ({ className }) => html`<svg className=${className} viewBox="0 0 40 40" fill="none" aria-hidden="true">
+  <path d="M29.5 8.2C26.6 6 23 5 19.4 5.4 11.6 6.3 5.6 13.1 6 21c.4 7.6 6.9 13.7 14.6 13.5 7.2-.2 13.2-5.9 13.6-13 .2-3.4-.8-6.6-2.7-9.2" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round"/>
+  <path d="M31.5 12.3c-.6-.9-1.2-1.7-2-2.4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" opacity=".6"/>
+  <path d="M33.6 4.2c1.6.6 2.4 2.2 1.8 3.7-.6 1.4-2.1 1.9-3.4 1.2-1-.6-1.4-1.9-.9-3 .5-1.2 1.4-1.9 2.5-1.9z" fill="var(--sakura)"/>
+</svg>`;
+const Petal = ({ className, style }) => html`<svg className=${className} style=${style} viewBox="0 0 12 12" aria-hidden="true"><path d="M6 .5C9 2.6 11 5.7 9.6 8.7 8.7 10.6 7 11.5 6 11.5S3.3 10.6 2.4 8.7C1 5.7 3 2.6 6 .5zm0 0l-.9 1.6L6 2.6l.9-.5z" fill="currentColor"/></svg>`;
+function Blossom({ x, y, r, rot }) {
+  return html`<g transform=${`translate(${x} ${y}) rotate(${rot || 0})`}>
+    ${[0, 1, 2, 3, 4].map((k) => html`<ellipse key=${k} cx="0" cy=${-r * 0.55} rx=${r * 0.42} ry=${r * 0.6} transform=${`rotate(${k * 72})`} fill="var(--sakura)" opacity=".82"/>`)}
+    <circle r=${r * 0.2} fill="var(--sakura-deep)"/>
+  </g>`;
+}
+const Branch = () => html`<svg className="branch" viewBox="0 0 260 170" fill="none" aria-hidden="true">
+  <path d="M262 20C222 29 192 35 160 52S112 74 72 78 32 87 14 100" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"/>
+  <path d="M160 52c-10-11-14-21-12-33" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+  <path d="M112 72c-7 15-5 30 5 41" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round"/>
+  <path d="M212 31c3 14 11 24 25 30" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round"/>
+  <path d="M72 78c-8-6-12-14-12-22" stroke="currentColor" strokeWidth="1" strokeLinecap="round"/>
+  <${Blossom} x=${148} y=${17} r=${8} rot=${12} />
+  <${Blossom} x=${118} y=${114} r=${6.5} rot=${40} />
+  <${Blossom} x=${238} y=${63} r=${7} rot=${-10} />
+  <${Blossom} x=${60} y=${54} r=${5.5} rot=${25} />
+  <ellipse cx="190" cy="40" rx="2.6" ry="4" transform="rotate(30 190 40)" fill="var(--sakura)" opacity=".7"/>
+  <ellipse cx="96" cy="76" rx="2.2" ry="3.4" transform="rotate(-40 96 76)" fill="var(--sakura)" opacity=".6"/>
+  <path d="M44 138c3 2 4 5 2 8-3 1-5-1-5-4z" fill="var(--sakura)" opacity=".7"/>
+  <path d="M96 156c3 1 5 4 3 7-3 1-5-1-5-4z" fill="var(--sakura)" opacity=".5"/>
+</svg>`;
+const PETALS = [{ l: '6%', d: 46, del: -8 }, { l: '27%', d: 58, del: -31 }, { l: '58%', d: 52, del: -19 }, { l: '81%', d: 62, del: -44 }, { l: '94%', d: 49, del: -2 }];
+const Petals = () => html`<div className="petals" aria-hidden="true">${PETALS.map((p, i) => html`<${Petal} key=${i} style=${{ left: p.l, animationDuration: p.d + 's', animationDelay: p.del + 's', width: 10 + (i % 3) * 3 + 'px' }} />`)}</div>`;
+
+const Urgency = ({ u }) => html`<span className=${'pill u-' + u}><span className="dot"></span>${u === 'Immediate' ? 'Immediate' : u + ' urgency'}</span>`;
+const sriColor = (s) => (s >= 65 ? 'var(--high)' : s >= 40 ? 'var(--mod)' : 'var(--low)');
+
+// ------------------------------------------------------------ data layer: server if present, else local engine
+const api = {
+  server: false,
+  config: null,
+  async boot() {
+    try {
+      const r = await fetch('/api/config', { headers: { Accept: 'application/json' } });
+      if (r.ok && (r.headers.get('content-type') || '').includes('json')) { this.config = await r.json(); this.server = !!this.config.server; }
+    } catch (_) { /* offline demo */ }
+    if (!this.server) {
+      this.config = {
+        server: false, model: E.MODEL, llm_mode: 'synthetic', twilio_mode: 'synthetic',
+        integrations: { GEMINI_API_KEY: '', TWILIO_ACCOUNT_SID: '', TWILIO_AUTH_TOKEN: '', TWILIO_WHATSAPP_NUMBER: '' },
+      };
+    }
+    return this.config;
+  },
+  async post(path, body) {
+    const r = await fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || `Request failed (${r.status})`);
+    return r.json();
+  },
+  async students() {
+    if (this.server) { const r = await fetch('/api/students'); return r.json(); }
+    const students = E.generateCohort();
+    return { students, stats: E.cohortStats(students) };
+  },
+  async triage(student, messages) {
+    if (this.server) return this.post('/api/triage', { student_id: student.id, messages });
+    await wait(900);
+    const score = E.computeSRI(student.metrics);
+    if (score.sri < E.MODEL.threshold) return { tier: 1, sri: score.sri, urgency: score.urgency, engine: 'tier1-regression', student_reply: E.tier1Nudge(student) };
+    const t = E.syntheticTriage(student, messages);
+    t.voucher = E.issueVoucher(student);
+    return t;
+  },
+  async outreach(student) {
+    if (this.server) return this.post('/api/outreach', { student_id: student.id });
+    await wait(700);
+    const slot = E.nextSlot();
+    const sim = (to) => ({ simulated: true, status: 'simulated', sid: 'SM_SIM_' + Math.random().toString(36).slice(2, 12).toUpperCase(), to });
+    return {
+      student_id: student.id,
+      slot: { counselor: 'Dr. Ananya', starts_at: slot.toISOString(), label: E.formatSlot(slot), minutes: 15 },
+      calendar_invite: null,
+      messages: { student: sim('student WhatsApp'), counselor: sim('Dr. Ananya') },
+      voucher: E.issueVoucher(student),
+      sent_at: new Date().toISOString(),
+    };
+  },
+  async confirm(student) {
+    if (this.server) return this.post('/api/confirm', { student_id: student.id });
+    await wait(400);
+    return { confirmed: true, slot: { label: E.formatSlot(E.nextSlot()) } };
+  },
+};
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+const RAHUL_THREAD = [
+  { id: 1, from: 'system', kind: 'auto', time: '6:12 PM', text: "Hey Rahul, noticed you haven't been at the court lately. Free for a quick 5-min pickup game match-up this weekend, or just need a quiet space to reset?" },
+  { id: 2, from: 'student', time: '6:40 PM', text: "Not feeling it man, academics are cooked, feel like I'm wasting everyone's time." },
+  { id: 3, from: 'system', kind: 'triage', time: '6:40 PM', text: "I hear you, Rahul. Thanks for sharing. We've reserved a confidential 15-minute chat with Dr. Ananya tomorrow at 4:00 PM. No paperwork, no fee clearance needed.", offer: true },
+];
+
+const OTHER_LINES = [
+  "honestly just tired all the time, can't sleep properly",
+  "i'm fine, just busy. skipping stuff to catch up",
+  'feel like I keep letting my parents down',
+  "don't really want to talk to anyone rn",
+  'whats the use, I failed the midsem anyway',
+];
+const threadFor = (s) => (s.id === 'STU-1208'
+  ? RAHUL_THREAD
+  : [{ from: 'system', text: E.tier1Nudge(s) }, { from: 'student', text: OTHER_LINES[parseInt(s.id.slice(4), 10) % OTHER_LINES.length] }]);
+
+const nowTime = () => new Date().toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit' }).toUpperCase();
+
+// ------------------------------------------------------------ App
+function App() {
+  const initial = ['student', 'counselor', 'engine'].includes(location.hash.slice(1)) ? location.hash.slice(1) : 'student';
+  const [view, setView] = useState(initial);
+  const [config, setConfig] = useState(null);
+  const [data, setData] = useState(null);
+  const [triages, setTriages] = useState({});     // id -> triage result
+  const [outreach, setOutreach] = useState({});   // id -> outreach result
+  const [confirmed, setConfirmed] = useState(false);
+  const [overrides, setOverrides] = useState({}); // id -> bool (manual changes)
+
+  useEffect(() => { (async () => { setConfig(await api.boot()); setData(await api.students()); })(); }, []);
+  useEffect(() => { try { history.replaceState(null, '', '#' + view); } catch (_) {} }, [view]);
+
+  const rahul = data && data.students.find((s) => s.id === 'STU-1208');
+
+  const runTriage = useCallback(async (student, messages) => {
+    const t = await api.triage(student, messages || threadFor(student));
+    setTriages((m) => Object.assign({}, m, { [student.id]: t }));
+    return t;
+  }, []);
+
+  // Pre-load Rahul's Tier 2 triage so every view opens in a working state
+  useEffect(() => { if (rahul && !triages[rahul.id]) runTriage(rahul); }, [rahul]);
+
+  const tabs = [
+    { id: 'student', label: 'Student', icon: 'chat' },
+    { id: 'counselor', label: 'Counselor', icon: 'users' },
+    { id: 'engine', label: 'Engine', icon: 'cpu' },
+  ];
+
+  return html`
+    <${Petals} />
+    <header className="top">
+      <div className="top-in">
+        <div className="brand">
+          <${Enso} className="mark" />
+          <div><h1>Kenzen</h1><small>a quiet space for campus wellbeing</small></div>
+        </div>
+        <nav className="tabs" role="tablist" aria-label="Views">
+          ${tabs.map((t) => html`<button key=${t.id} role="tab" id=${'tab-' + t.id} aria-selected=${view === t.id} className="tab" onClick=${() => setView(t.id)}>${t.label}</button>`)}
+        </nav>
+      </div>
+    </header>
+    <main>
+      <div className="trust">
+        <span className="pill trust-pill"><${Petal} className="petal-ico" />End-to-End Confidential | Bypasses Departmental Fee Verification</span>
+        ${config && html`<span className="pill mode" title="Integration mode">${config.server ? 'Local server' : 'Offline demo'} · LLM ${config.llm_mode} · WhatsApp ${config.twilio_mode}</span>`}
+      </div>
+      ${!data ? html`<div className="card"><div className="skeleton" style=${{ width: '40%' }}></div><div className="skeleton"></div><div className="skeleton" style=${{ width: '70%' }}></div></div>`
+        : view === 'student' ? html`<div className="fade" key="student"><${StudentView} rahul=${rahul} triage=${triages[rahul.id]} confirmed=${confirmed} setConfirmed=${setConfirmed} runTriage=${runTriage} /></div>`
+        : view === 'counselor' ? html`<div className="fade" key="counselor"><${CounselorView} data=${data} triages=${triages} runTriage=${runTriage} outreach=${outreach} setOutreach=${setOutreach} overrides=${overrides} setOverrides=${setOverrides} confirmed=${confirmed} /></div>`
+        : html`<div className="fade" key="engine"><${EngineView} rahul=${rahul} config=${config} /></div>`}
+    </main>
+    <footer>
+      <span className="quiet">Slow down. Take a breath. You're in a safe space.</span>
+      <span>Prototype on synthetic data. Kenzen helps counselors reach students sooner; it does not diagnose.</span>
+      <span>In crisis? Tele-MANAS <b className="num">14416</b> · free, 24×7</span>
+    </footer>`;
+}
+
+// ------------------------------------------------------------ View A: student
+function StudentView({ rahul, triage, confirmed, setConfirmed, runTriage }) {
+  const [msgs, setMsgs] = useState(RAHUL_THREAD);
+  const [draft, setDraft] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [confirming, setConfirming] = useState(false);
+  const [latest, setLatest] = useState(null);
+  const bodyRef = useRef(null);
+  const t = latest || triage;
+
+  useEffect(() => { const el = bodyRef.current; if (el) el.scrollTop = el.scrollHeight; }, [msgs, busy]);
+
+  async function confirm() {
+    setConfirming(true);
+    const r = await api.confirm(rahul);
+    setConfirming(false);
+    setConfirmed(true);
+    setMsgs((m) => m.map((x) => (x.offer ? Object.assign({}, x, { offer: false }) : x)).concat({
+      id: Date.now(), from: 'system', kind: 'confirm', time: nowTime(),
+      text: `You're booked: ${r.slot.label} with Dr. Ananya, Counselling Centre Room 2 (or video if you prefer). A calendar invite is on its way. Reply CHANGE anytime to move it.`,
+    }));
+  }
+
+  async function sendMsg(e) {
+    e.preventDefault();
+    const text = draft.trim();
+    if (!text || busy) return;
+    setDraft('');
+    const next = msgs.concat({ id: Date.now(), from: 'student', time: nowTime(), text });
+    setMsgs(next);
+    setBusy(true);
+    try {
+      const out = await runTriage(rahul, next.filter((m) => m.from !== 'notice').map((m) => ({ from: m.from, kind: m.kind, text: m.text })));
+      setLatest(out);
+      setMsgs((m) => m.map((x) => (x.offer ? Object.assign({}, x, { offer: false }) : x)).concat({
+        id: Date.now() + 1, from: 'system', kind: out.acute_risk ? 'urgent' : 'triage', time: nowTime(), text: out.student_reply, offer: !out.acute_risk && !confirmed,
+      }));
+    } catch (err) {
+      setMsgs((m) => m.concat({ id: Date.now() + 2, from: 'notice', text: `Couldn't reach the triage service: ${err.message}. Your message is saved; try again in a moment.` }));
+    }
+    setBusy(false);
+  }
+
+  function reset() { setMsgs(RAHUL_THREAD); setLatest(null); setConfirmed(false); }
+
+  const whoLabel = { auto: 'Automated check-in', triage: 'Kenzen · reply prepared for you', confirm: 'Booking confirmed', urgent: 'Kenzen · counselor alerted' };
+
+  return html`
+    <div className="view-head"><${Branch} />
+      <div>
+        <div className="eyebrow">View A · Student experience</div>
+        <h2>Help that arrives on WhatsApp, before things fall apart</h2>
+        <p>Rahul never fills a form. A friendly nudge, one honest reply, and a confidential slot is waiting for him. Type below to try your own reply.</p>
+      </div>
+    </div>
+    <div className="grid2">
+      <div className="phone" aria-label="WhatsApp conversation simulator">
+        <div className="chat-top">
+          <div className="avatar"><${Enso} /></div>
+          <div style=${{ flex: 1, minWidth: 0 }}><b>Campus Wellbeing</b><span>Confidential · replies within minutes</span></div>
+          <button className="linkbtn" onClick=${reset} title="Reset the conversation"><${Icon} n="reset" /></button>
+        </div>
+        <div className="chat-body" ref=${bodyRef} aria-live="polite">
+          <span className="daychip">Today</span>
+          ${msgs.map((m) => m.from === 'notice'
+            ? html`<div key=${m.id} className="notice">${m.text}</div>`
+            : html`<${React.Fragment} key=${m.id}>
+              <div className=${'msg ' + (m.from === 'student' ? 'out' : 'in')}>
+                ${m.from !== 'student' && html`<div className="who"><${Icon} n=${m.kind === 'confirm' ? 'check' : m.kind === 'auto' ? 'sparkle' : 'heart'} />${whoLabel[m.kind] || 'Kenzen'}</div>`}
+                <div>${m.text}</div>
+                <div className="t">${m.time}${m.from === 'student' ? ' ✓✓' : ''}</div>
+              </div>
+              ${m.offer && !confirmed && html`<div className="msg-actions">
+                <button className="btn btn-primary" onClick=${confirm} disabled=${confirming} id="confirm-slot">${confirming ? 'Confirming…' : 'Confirm Confidential 15-Min Slot'}</button>
+                <span className="muted" style=${{ fontSize: '.78rem' }}>One tap. Nothing else to fill in.</span>
+              </div>`}
+            </${React.Fragment}>`)}
+          ${busy && html`<div className="typing" aria-label="Kenzen is typing"><i></i><i></i><i></i></div>`}
+        </div>
+        <form className="chat-input" onSubmit=${sendMsg}>
+          <input id="chat-draft" value=${draft} onChange=${(e) => setDraft(e.target.value)} placeholder="Reply as Rahul…" aria-label="Type a reply as Rahul" autoComplete="off" />
+          <button className="send" type="submit" aria-label="Send" disabled=${busy}><${Icon} n="send" /></button>
+        </form>
+      </div>
+
+      <div className="stack">
+        ${confirmed && html`<div className="confirmed"><${Petal} className="ico" /><div>Slot confirmed. Dr. Ananya has the summary, and Rahul has a calendar invite. Time from first signal to booked care: under 24 hours.</div></div>`}
+        <div className="card">
+          <div className="eyebrow" style=${{ marginBottom: 14 }}>What happened behind this chat</div>
+          <div className="steps">
+            <div className="step on"><span className="n">1</span><div>
+              <h3>Quiet signals added up</h3>
+              <p>Attendance, court check-ins and library visits all dropped. The Tier 1 model scored Rahul <b className="num">${rahul.sri}</b> out of 100, above the 65 line.</p>
+            </div></div>
+            <div className=${'step' + (t ? ' on' : '')}><span className="n">2</span><div>
+              <h3>His words were read with care</h3>
+              <p>Only because he crossed the line did the language model read his reply. It flagged:</p>
+              <div className="chips">${t && t.distress_signals ? t.distress_signals.map((d, i) => html`<span key=${i} className=${'chip' + (d.category === 'possible risk to self' ? ' warn' : '')}>“${d.phrase}” · ${d.category}</span>`) : html`<span className="chip">Reading…</span>`}</div>
+            </div></div>
+            <div className=${'step' + (t ? ' on' : '')}><span className="n">3</span><div>
+              <h3>The paperwork stepped aside</h3>
+              <p>A Fast-Track Voucher skipped all 12 department approvals, including fee clearance.</p>
+              ${t && t.voucher && html`<div className="voucher" style=${{ marginTop: 8 }}>${t.voucher.voucher_id}</div>`}
+            </div></div>
+          </div>
+        </div>
+        <div className="card">
+          <div className="eyebrow" style=${{ marginBottom: 10 }}>Automated support vs. a real person</div>
+          <p style=${{ color: 'var(--ink-2)', fontSize: '.94rem' }}>Messages tagged <b>Automated check-in</b> are gentle nudges. Counselling always happens with a trained person: Dr. Ananya reads everything before the session, and no department ever sees it.</p>
+        </div>
+        <div className="card helpline">
+          <span className="avatar"><${Icon} n="phone" /></span>
+          <div><div className="eyebrow">If it can't wait</div><strong className="num">Tele-MANAS 14416</strong><span className="muted" style=${{ fontSize: '.88rem' }}>Free, confidential, 24×7, in 20+ languages. Or walk into the campus health centre.</span></div>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ------------------------------------------------------------ View B: counselor
+function CounselorView({ data, triages, runTriage, outreach, setOutreach, overrides, setOverrides, confirmed }) {
+  const { students, stats } = data;
+  const [filter, setFilter] = useState('all');
+  const [q, setQ] = useState('');
+  const [page, setPage] = useState(0);
+  const [selId, setSelId] = useState('STU-1208');
+  const PER = 12;
+
+  const sorted = useMemo(() => students.slice().sort((a, b) => (b.id === 'STU-1208') - (a.id === 'STU-1208') || b.sri - a.sri), [students]);
+  const rows = useMemo(() => sorted.filter((s) => {
+    if (filter === 'high' && s.sri < 65) return false;
+    if (filter === 'pending' && s.status !== 'Pending dept. approval') return false;
+    if (q) { const t = q.toLowerCase(); return s.name.toLowerCase().includes(t) || s.id.toLowerCase().includes(t) || s.program.toLowerCase().includes(t); }
+    return true;
+  }), [sorted, filter, q]);
+  useEffect(() => setPage(0), [filter, q]);
+  const pages = Math.max(1, Math.ceil(rows.length / PER));
+  const view = rows.slice(page * PER, page * PER + PER);
+  const sel = students.find((s) => s.id === selId);
+  const overrideCount = stats.overrides + Object.keys(overrides).filter((k) => overrides[k] && !students.find((s) => s.id === k).override_active).length;
+
+  return html`
+    <div className="view-head"><${Branch} />
+      <div>
+        <div className="eyebrow">View B · Counselor command</div>
+        <h2>Who needs a conversation this week</h2>
+        <p>Students above the 65 line are already fast-tracked. Everyone else gets light, automated check-ins until something changes.</p>
+      </div>
+    </div>
+    <div className="kpis">
+      <div className="card kpi"><div className="eyebrow">Students monitored</div><div className="v num">${stats.total}</div><div className="sub">opted in this semester</div></div>
+      <div className="card kpi"><div className="eyebrow">Automated check-ins active</div><div className="v num">${stats.automated_checkins}</div><div className="sub">Tier 1, low-touch</div></div>
+      <div className="card kpi"><div className="eyebrow">Bureaucracy overrides</div><div className="v num">${overrideCount}</div><div className="sub">12/12 approvals bypassed each</div></div>
+      <div className="card kpi"><div className="eyebrow">Average wait time</div><div className="v num">${stats.avg_wait_days} <small>days</small></div><div className="sub"><b>↓ from ${stats.baseline_wait_days} days</b> before Kenzen</div></div>
+    </div>
+    <div className="grid2 dash">
+      <div className="card">
+        <div className="toolbar">
+          <div className="seg" role="group" aria-label="Filter students">
+            <button aria-pressed=${filter === 'all'} onClick=${() => setFilter('all')}>All · ${stats.total}</button>
+            <button aria-pressed=${filter === 'high'} onClick=${() => setFilter('high')}>High risk (SRI ≥ 65) · ${stats.high_risk}</button>
+            <button aria-pressed=${filter === 'pending'} onClick=${() => setFilter('pending')}>Pending approvals · ${stats.pending}</button>
+          </div>
+          <label className="search"><${Icon} n="search" /><input id="student-search" value=${q} onChange=${(e) => setQ(e.target.value)} placeholder="Name, ID or program" aria-label="Search students" /></label>
+        </div>
+        <div className="tablewrap">
+          <table>
+            <thead><tr><th>Student</th><th>SRI</th><th>Risk factors</th><th>Status</th><th>Urgency</th></tr></thead>
+            <tbody>
+              ${view.map((s) => html`<tr key=${s.id} className=${(s.id === selId ? 'sel ' : '') + (s.highlighted ? 'star' : '')} onClick=${() => setSelId(s.id)} tabIndex="0" onKeyDown=${(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelId(s.id); } }} aria-selected=${s.id === selId}>
+                <td className="sname"><b>${s.id === 'STU-1208' ? 'Rahul' : s.name}</b><span className="num">ID: ${s.id} · ${s.program} · Y${s.year}</span></td>
+                <td><div className="srib"><b className="num" style=${{ minWidth: 32 }}>${Math.round(s.sri)}</b><div className="bar"><i style=${{ width: s.sri + '%', background: sriColor(s.sri) }}></i></div></div></td>
+                <td><div className="rf">${s.risk_factors.length ? s.risk_factors.map((f) => html`<span key=${f}>${f}</span>`) : html`<span className="muted" style=${{ background: 'none', padding: 0 }}>None flagged</span>`}</div></td>
+                <td className="status">${s.id === 'STU-1208' && confirmed ? 'Fast-track: slot booked' : s.status}</td>
+                <td><${Urgency} u=${s.urgency} /></td>
+              </tr>`)}
+              ${!view.length && html`<tr><td colSpan="5" className="muted" style=${{ textAlign: 'center', padding: 30 }}>No students match “${q}”. Try a name, an ID like STU-1208, or a program.</td></tr>`}
+            </tbody>
+          </table>
+        </div>
+        <div className="pager">
+          <span className="num">Showing ${rows.length ? page * PER + 1 : 0}–${Math.min(rows.length, (page + 1) * PER)} of ${rows.length}, highest risk first</span>
+          <div className="row">
+            <button className="btn btn-ghost" disabled=${page === 0} onClick=${() => setPage(page - 1)}>Previous</button>
+            <button className="btn btn-ghost" disabled=${page >= pages - 1} onClick=${() => setPage(page + 1)}>Next</button>
+          </div>
+        </div>
+      </div>
+      ${sel && html`<${ActionPanel} key=${sel.id} s=${sel} triage=${triages[sel.id]} runTriage=${runTriage} outreach=${outreach[sel.id]}
+          setOutreachFor=${(r) => setOutreach((m) => Object.assign({}, m, { [sel.id]: r }))}
+          override=${overrides[sel.id] !== undefined ? overrides[sel.id] : sel.override_active}
+          setOverride=${(v) => setOverrides((m) => Object.assign({}, m, { [sel.id]: v }))} confirmed=${confirmed} />`}
+    </div>`;
+}
+
+function ActionPanel({ s, triage, runTriage, outreach, setOutreachFor, override, setOverride, confirmed }) {
+  const [showDepts, setShowDepts] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [err, setErr] = useState('');
+  const high = s.sri >= 65;
+  const eligible = high || override;
+  const name = s.id === 'STU-1208' ? 'Rahul' : s.name;
+
+  useEffect(() => { if (eligible && !triage) runTriage(s).catch((e) => setErr(e.message)); }, [eligible]);
+
+  async function fastTrack() {
+    setSending(true); setErr('');
+    try { setOutreachFor(await api.outreach(s)); } catch (e) { setErr(`Outreach didn't go out: ${e.message}. Check the server is running, then try again.`); }
+    setSending(false);
+  }
+
+  const voucher = (outreach && outreach.voucher) || (triage && triage.voucher);
+  return html`
+    <aside className="card panel stack" aria-label=${'Action panel for ' + name}>
+      <div className="p-head">
+        <div style=${{ minWidth: 0 }}>
+          <div className="eyebrow">${high ? 'Tier 2 · fast-track' : override ? 'Manually escalated' : 'Tier 1 · automated'}</div>
+          <h2 style=${{ marginTop: 4 }}>${name}</h2>
+          <span className="muted num" style=${{ fontSize: '.86rem' }}>ID: ${s.id} · ${s.program} · Hostel ${s.hostel}</span>
+        </div>
+        <div style=${{ textAlign: 'right' }}>
+          <div className="bigsri num" style=${{ color: sriColor(s.sri) }}>${Math.round(s.sri)}<small>/100</small></div>
+          <${Urgency} u=${triage && triage.urgency === 'Immediate' ? 'Immediate' : s.urgency} />
+        </div>
+      </div>
+      ${s.risk_factors.length > 0 && html`<div className="rf">${s.risk_factors.map((f) => html`<span key=${f}>${f}</span>`)}</div>`}
+
+      ${eligible ? html`
+        <div>
+          <div className="row" style=${{ justifyContent: 'space-between', marginBottom: 10 }}>
+            <h3>Triage summary</h3>
+            <span className="muted" style=${{ fontSize: '.76rem' }}>${triage ? triage.engine : 'reading…'}</span>
+          </div>
+          ${triage && triage.summary ? html`<ul className="bullets">${triage.summary.map((b, i) => html`<li key=${i}><span className="bn">${i + 1}</span><span>${b}</span></li>`)}</ul>`
+            : html`<div><div className="skeleton"></div><div className="skeleton" style=${{ width: '85%' }}></div><div className="skeleton" style=${{ width: '60%' }}></div></div>`}
+        </div>` : html`
+        <div className="override" style=${{ background: 'var(--surface-2)' }}>
+          <p style=${{ fontSize: '.92rem', color: 'var(--ink-2)' }}>Below the 65 line, so no language model reads ${name.split(' ')[0]}'s messages. Kenzen keeps sending light check-ins like this one:</p>
+          <p style=${{ marginTop: 8, fontStyle: 'italic', fontSize: '.9rem' }}>“${E.tier1Nudge(s)}”</p>
+        </div>`}
+
+      <div className="override">
+        <button className="switch" role="switch" aria-checked=${!!override} onClick=${() => setOverride(!override)} id="override-switch">
+          <span><b>Bureaucracy Override Active: ${override ? 'TRUE' : 'FALSE'}</b><br/><span className="muted" style=${{ fontSize: '.84rem' }}>${override ? 'Fee and approval checks skipped for this referral' : s.status === 'Pending dept. approval' ? 'Waiting on department sign-offs. Switch on to escalate.' : 'Standard referral route'}</span></span>
+          <span className="track"></span>
+        </button>
+        <div className=${'lock ' + (override ? 'on' : 'off')}>
+          <${Icon} n=${override ? 'unlock' : 'lock'} />
+          ${override ? '12/12 Department Approvals Auto-Bypassed' : '0/12 approvals in hand · typical wait 21 days'}
+        </div>
+        <button className="linkbtn" onClick=${() => setShowDepts(!showDepts)} aria-expanded=${showDepts}>${showDepts ? 'Hide' : 'Show'} the 12 checks</button>
+        ${showDepts && html`<div className="depts">${E.DEPARTMENTS.map((d) => html`<div key=${d.dept}><span>${override ? '✓' : '○'} ${d.dept}</span><span>${d.check}</span></div>`)}</div>`}
+        ${override && voucher && html`<div className="voucher" style=${{ marginTop: 10 }}>Voucher ${voucher.voucher_id} · valid ${voucher.valid_hours}h</div>`}
+      </div>
+
+      ${outreach ? html`
+        <div className="sent" role="status">
+          <div><span className="ok"><${Icon} n="calendar" /></span><span><b>Calendar invite sent</b> for ${outreach.slot.label} (15 min, Dr. Ananya).
+            ${outreach.calendar_invite ? html` <a href=${outreach.calendar_invite} download>Download .ics</a>` : html` <span className="muted">The .ics file downloads when running the local server.</span>`}</span></div>
+          <div><span className="ok"><${Icon} n="chat" /></span><span><b>WhatsApp to ${name.split(' ')[0]}</b> · ${outreach.messages.student.simulated ? 'simulated' : outreach.messages.student.status} <span className="muted mono">${outreach.messages.student.sid || outreach.messages.student.error || ''}</span></span></div>
+          <div><span className="ok"><${Icon} n="phone" /></span><span><b>SMS to Dr. Ananya</b> · ${outreach.messages.counselor.simulated ? 'simulated' : outreach.messages.counselor.status} <span className="muted mono">${outreach.messages.counselor.sid || outreach.messages.counselor.error || ''}</span></span></div>
+          ${s.id === 'STU-1208' && confirmed && html`<div><span className="ok"><${Icon} n="check" /></span><span><b>Rahul confirmed the slot</b> from WhatsApp.</span></div>`}
+        </div>` : null}
+      ${err && html`<div className="notice" style=${{ alignSelf: 'stretch' }}>${err}</div>`}
+      <button className="btn btn-primary btn-block" onClick=${fastTrack} disabled=${!override || sending} id="fast-track">
+        ${sending ? 'Sending…' : outreach ? 'Resend Fast-Track Outreach' : 'Fast-Track Direct Outreach'}
+      </button>
+      ${!override && html`<span className="muted" style=${{ fontSize: '.82rem', marginTop: -8 }}>Switch the override on to send a direct invite.</span>`}
+    </aside>`;
+}
+
+// ------------------------------------------------------------ View C: engine monitor
+function jsonHighlight(obj, flashKeys) {
+  const esc = (t) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return esc(JSON.stringify(obj, null, 2)).replace(/("(?:\\.|[^"\\])*")(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d+)?(?:e[+-]?\d+)?/g, (m, str, colon, bool) => {
+    if (str) {
+      if (colon) { const k = str.slice(1, -1); return `<span class="k${flashKeys.includes(k) ? ' flash' : ''}">${str}</span>${colon}`; }
+      return `<span class="s">${str}</span>`;
+    }
+    if (bool) return `<span class="bo">${m}</span>`;
+    return `<span class="n">${m}</span>`;
+  });
+}
+
+function EngineView({ rahul, config }) {
+  const base = rahul.metrics;
+  const [att, setAtt] = useState(base.attendance_drop_pct);
+  const [sports, setSports] = useState(base.sports_inactivity_pct);
+  const [lib, setLib] = useState(base.library_drop_pct);
+  const [gpa, setGpa] = useState(base.gpa_curr);
+  const [log, setLog] = useState(() => [{ t: nowTime(), text: `Loaded rahul_data.json · SRI ${rahul.sri} ≥ 65.0 → Tier 2 triage active` }]);
+  const metrics = { attendance_drop_pct: att, sports_inactivity_pct: sports, library_drop_pct: lib, gpa_prev: base.gpa_prev, gpa_curr: gpa };
+  const score = E.computeSRI(metrics);
+  const tier2 = score.tier === 2;
+  const prevTier = useRef(score.tier);
+
+  useEffect(() => {
+    if (prevTier.current !== score.tier) {
+      const up = score.tier === 2;
+      setLog((l) => [{ t: new Date().toLocaleTimeString('en-IN', { hour12: false }), text: up
+        ? `SRI ${score.sri.toFixed(1)} crossed 65.0 ↑ · Tier 2 LLM triage triggered, voucher issued`
+        : `SRI ${score.sri.toFixed(1)} fell below 65.0 ↓ · routed to Tier 1 automated wellness check` }].concat(l).slice(0, 20));
+      prevTier.current = score.tier;
+    }
+  }, [score.tier]);
+
+  const doc = {
+    student_id: rahul.id, name: rahul.name, program: rahul.program, year: rahul.year,
+    window: '2026-08-01/2026-09-30',
+    telemetry: { attendance_drop_pct: att, sports_rfid_inactivity_pct: sports, library_drop_pct: lib, gpa_prev: base.gpa_prev, gpa_curr: gpa, last_court_checkin_days: rahul.context.last_court_checkin_days },
+    tier1: { model: score.model_version, sri: score.sri, contributions: score.contributions, threshold: score.threshold, route: score.route },
+    tier2_escalation: tier2,
+  };
+  const changed = [];
+  if (att !== base.attendance_drop_pct) changed.push('attendance_drop_pct');
+  if (sports !== base.sports_inactivity_pct) changed.push('sports_rfid_inactivity_pct');
+  if (lib !== base.library_drop_pct) changed.push('library_drop_pct');
+  if (gpa !== base.gpa_curr) changed.push('gpa_curr');
+  if (changed.length) changed.push('sri', 'route');
+
+  const reset = () => { setAtt(base.attendance_drop_pct); setSports(base.sports_inactivity_pct); setLib(base.library_drop_pct); setGpa(base.gpa_curr); };
+  const W = E.MODEL.weights;
+  const maxC = 35;
+
+  return html`
+    <div className="view-head"><${Branch} />
+      <div>
+        <div className="eyebrow">View C · Live architecture</div>
+        <h2>Cheap math first, a language model only when it matters</h2>
+        <p>Tier 1 is a four-weight regression that scores all 500 students in milliseconds. Only scores at or above 65.0 ever reach Tier 2, which keeps LLM calls to about 3% of students.</p>
+      </div>
+      <button className="btn btn-ghost" onClick=${reset}>Reset to Rahul's data</button>
+    </div>
+    <div className="card pipe-card" style=${{ marginBottom: 36 }}>
+      <div className="pipe">
+        <div className="node on"><b>Telemetry</b>Attendance, RFID, library, GPA</div>
+        <span className="arrow"><${Icon} n="arrow" /></span>
+        <div className="node on"><b>Tier 1 regression</b>SRI <span className="num">${score.sri.toFixed(1)}</span></div>
+        <span className="arrow"><${Icon} n="arrow" /></span>
+        <div className=${'node ' + (tier2 ? 'hot' : 'on')}><b>Gate: SRI ≥ 65.0</b>${tier2 ? 'Crossed' : 'Not crossed'}</div>
+        <span className="arrow"><${Icon} n="arrow" /></span>
+        ${tier2
+          ? html`<div className="node hot"><b>Tier 2 LLM triage</b>${config.llm_mode === 'synthetic' ? 'Synthetic fallback' : config.llm_mode}</div>
+                 <span className="arrow"><${Icon} n="arrow" /></span>
+                 <div className="node hot"><b>Fast-Track Voucher</b>12/12 approvals bypassed</div>`
+          : html`<div className="node on"><b>Automated wellness check</b>No LLM call</div>`}
+      </div>
+    </div>
+    <div className="grid2" style=${{ gridTemplateColumns: 'minmax(0,1fr) minmax(0, 460px)' }}>
+      <div className="stack">
+        <div className="card">
+          <div className="row" style=${{ justifyContent: 'space-between' }}>
+            <div><div className="eyebrow">Student Risk Index · ${rahul.id}</div>
+              <div className="bigsri num" style=${{ color: sriColor(score.sri), marginTop: 6 }}>${score.sri.toFixed(1)}<small> / 100</small></div></div>
+            <div className=${'banner ' + (tier2 ? 't2' : 't1')} role="status">
+              <${Petal} className="petal-ico" />${tier2 ? 'Tier 2 LLM triage triggered' : 'Tier 1 automated check only'}
+            </div>
+          </div>
+          <div className="gauge" aria-hidden="true">
+            <div className="fill" style=${{ width: score.sri + '%', background: sriColor(score.sri), opacity: 0.85 }}></div>
+            <div className="thr" style=${{ left: '65%' }}><span>65.0</span></div>
+            <span className="tick" style=${{ left: '0%', transform: 'none' }}>0</span>
+            <span className="tick" style=${{ left: '40%' }}>40</span>
+            <span className="tick" style=${{ left: '100%', transform: 'translateX(-100%)' }}>100</span>
+          </div>
+          <div className="stack" style=${{ gap: 18 }}>
+            <div className="slider"><label htmlFor="s-att"><span>Attendance Drop %</span><span className="num">${att}%</span></label>
+              <input id="s-att" type="range" min="0" max="100" value=${att} onChange=${(e) => setAtt(+e.target.value)} /></div>
+            <div className="slider"><label htmlFor="s-sports"><span>Sports Inactivity % <span className="muted" style=${{ fontWeight: 400 }}>(court RFID)</span></span><span className="num">${sports}%</span></label>
+              <input id="s-sports" type="range" min="0" max="100" value=${sports} onChange=${(e) => setSports(+e.target.value)} /></div>
+            <div className="slider"><label htmlFor="s-lib"><span>Library Activity Drop %</span><span className="num">${lib}%</span></label>
+              <input id="s-lib" type="range" min="0" max="100" value=${lib} onChange=${(e) => setLib(+e.target.value)} /></div>
+            <div className="slider"><label htmlFor="s-gpa"><span>Current CGPA <span className="muted" style=${{ fontWeight: 400 }}>(was ${base.gpa_prev.toFixed(2)})</span></span><span className="num">${gpa.toFixed(2)}</span></label>
+              <input id="s-gpa" type="range" min="5" max="10" step="0.01" value=${gpa} onChange=${(e) => setGpa(+e.target.value)} /></div>
+          </div>
+        </div>
+        <div className="card">
+          <h3 style=${{ marginBottom: 6 }}>How the score is built</h3>
+          <p className="mono muted" style=${{ marginBottom: 14, overflowX: 'auto', whiteSpace: 'nowrap' }}>SRI = 0.35·attendance + 0.25·sports + 0.15·library + 0.25·gpa_drift</p>
+          <div className="stack" style=${{ gap: 10 }}>
+            ${Object.keys(W).map((k) => html`<div key=${k} className="contrib">
+              <span>${E.MODEL.labels[k]} <span className="muted num">×${W[k]}</span></span>
+              <div className="b"><i style=${{ width: Math.min(100, (score.contributions[k] / maxC) * 100) + '%' }}></i></div>
+              <b className="num" style=${{ textAlign: 'right' }}>${score.contributions[k].toFixed(1)}</b>
+            </div>`)}
+          </div>
+          <p className="muted" style=${{ fontSize: '.82rem', marginTop: 12 }}>GPA drift = fall in CGPA ÷ 2.0 × 100, capped at 100. A two-point fall on the 10-point scale counts as maximum drift.</p>
+        </div>
+        <div className="card">
+          <h3 style=${{ marginBottom: 10 }}>Event log</h3>
+          <div className="log" aria-live="polite">${log.map((l, i) => html`<div key=${i}><span className="muted">${l.t}</span> ${l.text}</div>`)}</div>
+        </div>
+      </div>
+      <div className="stack">
+        <div className="card">
+          <div className="row" style=${{ justifyContent: 'space-between', marginBottom: 10 }}>
+            <h3 className="mono" style=${{ fontWeight: 500 }}>rahul_data.json</h3>
+            <span className="pill mode">${changed.length ? 'edited live' : 'as ingested'}</span>
+          </div>
+          <pre className="json" dangerouslySetInnerHTML=${{ __html: jsonHighlight(doc, changed) }}></pre>
+        </div>
+        <div className="card">
+          <h3 style=${{ marginBottom: 10 }}>Integrations</h3>
+          <div className="keys">
+            ${Object.keys(config.integrations).map((k) => html`<${React.Fragment} key=${k}><code>${k}</code>
+              <span className=${'pill ' + (config.integrations[k] ? 'u-Low' : 'mode')}>${config.integrations[k] ? 'set · live' : 'empty · synthetic'}</span></${React.Fragment}>`)}
+          </div>
+          <p className="muted" style=${{ fontSize: '.82rem', marginTop: 12 }}>${config.server
+            ? 'Add keys to .env and restart to go live. Empty keys fall back to realistic synthetic responses.'
+            : 'Running without the local server, so everything uses the built-in synthetic engine. Run "node server.js" to connect real keys.'}</p>
+        </div>
+      </div>
+    </div>`;
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(html`<${App} />`);
+})();
+</script>
+</body>
+</html>
